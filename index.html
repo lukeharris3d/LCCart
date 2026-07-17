@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Babylon Lite Scene</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- The importmap tells the browser where to find "babylon-lite" -->
+    <script type="importmap">
+      {
+        "imports": {
+          "babylon-lite": "https://cdn.jsdelivr.net/gh/sebavan/babylon-lite@master/dist/babylon-lite.js"
+        }
+      }
+    </script>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
