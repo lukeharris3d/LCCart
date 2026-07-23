@@ -1,8 +1,0 @@
-RL
-
-https://lukeharris3d.github.io/LCCart/glb/RL_shelter_01.babylon
-
-
-env
-
-https://lukeharris3d.github.io/LCCart/glb/brown_photostudio_2k.env
