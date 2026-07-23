@@ -138,8 +138,8 @@ const createScene = async function () {
     container.addControl(btn);
   };
 
-  createModernButton("Shelter", model1);
-  createModernButton("Bollards", model2);
+  createModernButton("Bike Rack", model1);
+  createModernButton("Seating", model2);
 
   return scene;
 };
