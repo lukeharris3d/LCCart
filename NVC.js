@@ -149,7 +149,7 @@ const createScene = async function () {
   modelUrls.forEach((url, index) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(
       `btn${index}`,
-      `Sculpture ${index + 1}`
+      `Arrangement ${index + 1}`
     );
     applyModernStyle(btn);
     btn.shadowBlur = 0;
@@ -165,7 +165,7 @@ const createScene = async function () {
     btn.onPointerUpObservable.add(() => {
       selectModel(url);
       listContainer.isVisible = false;
-      menuTrigger.text = "SELECT ARTWORK ▴";
+      menuTrigger.text = "Options▴";
     });
 
     listContainer.addControl(btn);
@@ -173,7 +173,7 @@ const createScene = async function () {
 
   const menuTrigger = BABYLON.GUI.Button.CreateSimpleButton(
     "menuTrigger",
-    "SELECT ARTWORK ▴"
+    "Options▴"
   );
   applyModernStyle(menuTrigger);
   menuTrigger.top = "12px";
@@ -182,7 +182,7 @@ const createScene = async function () {
     listContainer.isVisible = !listContainer.isVisible;
     menuTrigger.text = listContainer.isVisible
       ? "HIDE MENU ▾"
-      : "SELECT ARTWORK ▴";
+      : "Options▴";
   });
   mainContainer.addControl(menuTrigger);
 
