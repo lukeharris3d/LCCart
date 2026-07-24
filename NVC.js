@@ -36,7 +36,7 @@ const createScene = async function () {
   // 2. Environment
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
-  scene.imageProcessingConfiguration.exposure = 1;
+  scene.imageProcessingConfiguration.exposure = 0.8;
 
   // 3. Ground
   const ground = BABYLON.MeshBuilder.CreateGround(
@@ -69,9 +69,14 @@ const createScene = async function () {
 
   // 5. Model Management
   const loadedModels = new Map();
+  const buttonControls = []; // To track buttons for color swapping
   let currentActiveUrl = null;
 
-  const selectModel = async (url) => {
+  const selectModel = async (url, targetBtn) => {
+    // UI Update: Reset all buttons to white, set target to active grey
+    buttonControls.forEach((btn) => (btn.background = "#FFFFFF"));
+    if (targetBtn) targetBtn.background = "#E0E0E0";
+
     if (currentActiveUrl && loadedModels.has(currentActiveUrl)) {
       loadedModels.get(currentActiveUrl).setEnabled(false);
     }
@@ -107,30 +112,18 @@ const createScene = async function () {
     }
   };
 
-  // 6. UI Implementation
+  // 6. UI Implementation (Permanent Side Stack)
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
   const mainContainer = new BABYLON.GUI.StackPanel();
-  mainContainer.width = "220px";
+  mainContainer.width = "100px";
+  mainContainer.spacing = 8; // Gap between buttons
   mainContainer.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   mainContainer.verticalAlignment =
-    BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
   mainContainer.left = "-40px";
-  mainContainer.top = "-40px";
   ui.addControl(mainContainer);
-
-  const listContainer = new BABYLON.GUI.StackPanel();
-  listContainer.width = "100%";
-  listContainer.background = "#FFFFFF";
-  listContainer.cornerRadius = 8;
-  listContainer.isVisible = false;
-  listContainer.paddingBottom = "8px";
-  listContainer.paddingTop = "8px";
-  listContainer.shadowColor = "rgba(0,0,0,0.1)";
-  listContainer.shadowBlur = 10;
-  listContainer.shadowOffsetY = 4;
-  mainContainer.addControl(listContainer);
 
   const applyModernStyle = (btn) => {
     btn.height = "44px";
@@ -149,46 +142,27 @@ const createScene = async function () {
   modelUrls.forEach((url, index) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(
       `btn${index}`,
-      `Arrangement ${index + 1}`
+      `Option ${index + 1}`
     );
     applyModernStyle(btn);
-    btn.shadowBlur = 0;
-    btn.shadowOffsetY = 0;
 
     btn.onPointerEnterObservable.add(() => {
-      btn.background = "#F8F8F8";
+      if (currentActiveUrl !== url) btn.background = "#F8F8F8";
     });
     btn.onPointerOutObservable.add(() => {
-      btn.background = "#FFFFFF";
+      if (currentActiveUrl !== url) btn.background = "#FFFFFF";
     });
 
     btn.onPointerUpObservable.add(() => {
-      selectModel(url);
-      listContainer.isVisible = false;
-      menuTrigger.text = "Options▴";
+      selectModel(url, btn);
     });
 
-    listContainer.addControl(btn);
+    mainContainer.addControl(btn);
+    buttonControls.push(btn);
   });
 
-  const menuTrigger = BABYLON.GUI.Button.CreateSimpleButton(
-    "menuTrigger",
-    "Options▴"
-  );
-  applyModernStyle(menuTrigger);
-  menuTrigger.top = "12px";
-
-  menuTrigger.onPointerUpObservable.add(() => {
-    listContainer.isVisible = !listContainer.isVisible;
-    menuTrigger.text = listContainer.isVisible
-      ? "HIDE MENU ▾"
-      : "Options▴";
-  });
-  mainContainer.addControl(menuTrigger);
-
-  // --- SET DEFAULT MODEL ---
-  // This calls the loading function for the first URL in your list automatically
-  selectModel(modelUrls[0]);
+  // Load the first model by default and highlight the first button
+  selectModel(modelUrls[0], buttonControls[0]);
 
   return scene;
 };
