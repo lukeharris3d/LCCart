@@ -6,7 +6,7 @@ const createScene = async function () {
   scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
 
   const model1Url = "https://lukeharris3d.github.io/LCCart/glb/AV_01.glb";
-  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02.glb";
+  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02a.glb";
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
