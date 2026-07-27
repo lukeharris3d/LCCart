@@ -28,7 +28,7 @@ const createScene = async function () {
   scene.environmentTexture = envTex;
 
   // Increase exposure by 0.5 (Default is 1.0)
-  scene.imageProcessingConfiguration.exposure = 2;
+  scene.imageProcessingConfiguration.exposure = 1.5;
 
   // 3. Ground Plane
   const ground = BABYLON.MeshBuilder.CreateGround(
