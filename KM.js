@@ -93,7 +93,7 @@ const createScene = async function () {
 
       // Grounding logic
       const hierarchy = root.getHierarchyBoundingVectors();
-      root.position.y -= hierarchy.min.y;
+      root.position.y = 0;
 
       // Specific adjustment for KM_02: Lower by 1m
       if (url === "https://lukeharris3d.github.io/LCCart/glb/KM_02.glb") {
