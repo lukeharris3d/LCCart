@@ -31,7 +31,8 @@ const createScene = async function () {
   // 2. Environment
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
-  scene.imageProcessingConfiguration.exposure = 0.8;
+  scene.imageProcessingConfiguration.exposure = 2;
+  scene.environmentIntensity = 2;
 
   // 3. Ground
   const ground = BABYLON.MeshBuilder.CreateGround(
@@ -64,7 +65,7 @@ const createScene = async function () {
 
   // 5. Model Management
   const loadedModels = new Map();
-  const buttonControls = []; 
+  const buttonControls = [];
   let currentActiveUrl = null;
 
   const selectModel = async (url, targetBtn) => {
@@ -94,6 +95,11 @@ const createScene = async function () {
       const hierarchy = root.getHierarchyBoundingVectors();
       root.position.y -= hierarchy.min.y;
 
+      // Specific adjustment for KM_02: Lower by 1m
+      if (url === "https://lukeharris3d.github.io/LCCart/glb/KM_02.glb") {
+        root.position.y = 0;
+      }
+
       result.meshes.forEach((m) => {
         if (m instanceof BABYLON.Mesh) {
           iblShadows.addShadowCastingMesh(m);
@@ -112,9 +118,11 @@ const createScene = async function () {
 
   const mainContainer = new BABYLON.GUI.StackPanel();
   mainContainer.width = "100px";
-  mainContainer.spacing = 8; 
-  mainContainer.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-  mainContainer.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+  mainContainer.spacing = 8;
+  mainContainer.horizontalAlignment =
+    BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+  mainContainer.verticalAlignment =
+    BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
   mainContainer.left = "-40px";
   ui.addControl(mainContainer);
 
