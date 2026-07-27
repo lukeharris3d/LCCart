@@ -78,7 +78,7 @@ const createScene = async function () {
     const root = result.meshes[0];
     const bounds = scene.getWorldExtends();
 
-    root.position.y -= bounds.min.y; // Grounding
+    root.position.y = 0; // Grounding
     root.position.z = zPos; // Position along Z axis
 
     result.meshes.forEach((m) => {
@@ -90,7 +90,7 @@ const createScene = async function () {
 
   // model1 at Z=0, model2 at Z=3
   model1 = await loadModel(model1Url, 0);
-  model2 = await loadModel(model2Url, -2);
+  model2 = await loadModel(model2Url, 0);
 
   // Initial shadow calculation
   iblShadows.updateSceneBounds();
