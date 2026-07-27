@@ -28,7 +28,7 @@ const createScene = async function () {
   scene.environmentTexture = envTex;
 
   // Increase exposure by 0.5 (Default is 1.0)
-  scene.imageProcessingConfiguration.exposure = 1.5;
+  scene.imageProcessingConfiguration.exposure = 2.5;
 
   // 3. Ground Plane
   const ground = BABYLON.MeshBuilder.CreateGround(
@@ -57,7 +57,7 @@ const createScene = async function () {
       ssShadowsEnabled: true,
       shadowRemanence: 0.7,
       triPlanarVoxelization: true,
-      shadowOpacity: 1.3,
+      shadowOpacity: 1,
     },
     [camera]
   );
