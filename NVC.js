@@ -97,7 +97,7 @@ const createScene = async function () {
 
       // Grounding logic
       const hierarchy = root.getHierarchyBoundingVectors();
-      root.position.y -= hierarchy.min.y;
+      root.position.y = 0;
 
       result.meshes.forEach((m) => {
         if (m instanceof BABYLON.Mesh) {
