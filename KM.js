@@ -6,7 +6,7 @@ const createScene = async function () {
   scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
 
   const envUrl =
-    "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
+    "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_km.env";
 
   // UPDATED: Replaced with your 3 KM model URLs
   const modelUrls = [
