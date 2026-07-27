@@ -95,11 +95,6 @@ const createScene = async function () {
       const hierarchy = root.getHierarchyBoundingVectors();
       root.position.y = 0;
 
-      // Specific adjustment for KM_02: Lower by 1m
-      if (url === "https://lukeharris3d.github.io/LCCart/glb/KM_02.glb") {
-        root.position.y = 0;
-      }
-
       result.meshes.forEach((m) => {
         if (m instanceof BABYLON.Mesh) {
           iblShadows.addShadowCastingMesh(m);
