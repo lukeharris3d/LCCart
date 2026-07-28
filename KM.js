@@ -8,7 +8,7 @@ const createScene = async function () {
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_km.env";
 
-  // UPDATED: Replaced with your 3 KM model URLs
+  // The 3 KM model URLs
   const modelUrls = [
     "https://lukeharris3d.github.io/LCCart/glb/KM_01.glb",
     "https://lukeharris3d.github.io/LCCart/glb/KM_02.glb",
@@ -31,8 +31,8 @@ const createScene = async function () {
   // 2. Environment
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
-  scene.imageProcessingConfiguration.exposure = 2;
-  scene.environmentIntensity = 2;
+  scene.imageProcessingConfiguration.exposure = 1.3;
+  scene.environmentIntensity = 3;
 
   // 3. Ground
   const ground = BABYLON.MeshBuilder.CreateGround(
@@ -45,25 +45,7 @@ const createScene = async function () {
   groundMat.roughness = 0.9;
   ground.material = groundMat;
 
-  // 4. Shadow Pipeline
-  const gBuffer = scene.enableGeometryBufferRenderer();
-  const iblShadows = new BABYLON.IblShadowsRenderPipeline(
-    "iblShadows",
-    scene,
-    {
-      resolutionExp: 6,
-      sampleDirections: 32,
-      ssShadowsEnabled: true,
-      shadowRemanence: 0.7,
-      triPlanarVoxelization: true,
-      shadowOpacity: 1,
-    },
-    [camera]
-  );
-  iblShadows.ssShadowOpacity = 1.0;
-  iblShadows.addShadowReceivingMaterial(groundMat);
-
-  // 5. Model Management
+  // 4. Model Management (IBL Shadows logic removed)
   const loadedModels = new Map();
   const buttonControls = [];
   let currentActiveUrl = null;
@@ -73,15 +55,15 @@ const createScene = async function () {
     buttonControls.forEach((btn) => (btn.background = "#FFFFFF"));
     if (targetBtn) targetBtn.background = "#E0E0E0";
 
+    // Disable previous model
     if (currentActiveUrl && loadedModels.has(currentActiveUrl)) {
       loadedModels.get(currentActiveUrl).setEnabled(false);
     }
     currentActiveUrl = url;
 
+    // Show or Load
     if (loadedModels.has(url)) {
-      const root = loadedModels.get(url);
-      root.setEnabled(true);
-      iblShadows.updateVoxelization();
+      loadedModels.get(url).setEnabled(true);
     } else {
       const result = await BABYLON.SceneLoader.ImportMeshAsync(
         "",
@@ -92,23 +74,13 @@ const createScene = async function () {
       const root = result.meshes[0];
 
       // Grounding logic
-      const hierarchy = root.getHierarchyBoundingVectors();
       root.position.y = 0;
 
-      result.meshes.forEach((m) => {
-        if (m instanceof BABYLON.Mesh) {
-          iblShadows.addShadowCastingMesh(m);
-          if (m.material) iblShadows.addShadowReceivingMaterial(m.material);
-        }
-      });
-
       loadedModels.set(url, root);
-      iblShadows.updateSceneBounds();
-      iblShadows.updateVoxelization();
     }
   };
 
-  // 6. UI Implementation
+  // 5. UI Implementation
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
   const mainContainer = new BABYLON.GUI.StackPanel();
@@ -135,7 +107,6 @@ const createScene = async function () {
     btn.shadowOffsetY = 4;
   };
 
-  // This loop automatically creates only 3 buttons now
   modelUrls.forEach((url, index) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(
       `btn${index}`,
