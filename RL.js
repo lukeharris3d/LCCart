@@ -28,7 +28,8 @@ const createScene = async function () {
   scene.environmentTexture = envTex;
 
   // Increase exposure by 0.5 (Default is 1.0)
-  scene.imageProcessingConfiguration.exposure = 2.5;
+  scene.imageProcessingConfiguration.exposure = 2;
+  scene.environmentIntensity = 1;
 
   // 3. Ground Plane
   const ground = BABYLON.MeshBuilder.CreateGround(
@@ -53,16 +54,16 @@ const createScene = async function () {
     scene,
     {
       resolutionExp: 6,
-      sampleDirections: 32,
+      sampleDirections: 16,
       ssShadowsEnabled: true,
-      shadowRemanence: 0.7,
+      shadowRemanence: 0.9,
       triPlanarVoxelization: true,
-      shadowOpacity: 1,
+      shadowOpacity: 2,
     },
     [camera]
   );
 
-  iblShadows.ssShadowOpacity = 1.0;
+  iblShadows.ssShadowOpacity = 1;
   iblShadows.addShadowReceivingMaterial(groundMat);
 
   // 5. Load Models - Changed helper to use zPos instead of xPos
