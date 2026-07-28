@@ -36,7 +36,7 @@ const createScene = async function () {
   // 2. Environment
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
-  scene.imageProcessingConfiguration.exposure = 0.8;
+  scene.imageProcessingConfiguration.exposure = 0.9; // Adjusted for non-shadow lighting
 
   // 3. Ground
   const ground = BABYLON.MeshBuilder.CreateGround(
@@ -49,43 +49,24 @@ const createScene = async function () {
   groundMat.roughness = 0.9;
   ground.material = groundMat;
 
-  // 4. Shadow Pipeline
-  const gBuffer = scene.enableGeometryBufferRenderer();
-  const iblShadows = new BABYLON.IblShadowsRenderPipeline(
-    "iblShadows",
-    scene,
-    {
-      resolutionExp: 6,
-      sampleDirections: 32,
-      ssShadowsEnabled: true,
-      shadowRemanence: 0.7,
-      triPlanarVoxelization: true,
-      shadowOpacity: 1,
-    },
-    [camera]
-  );
-  iblShadows.ssShadowOpacity = 1.0;
-  iblShadows.addShadowReceivingMaterial(groundMat);
-
-  // 5. Model Management
+  // 4. Model Management
   const loadedModels = new Map();
-  const buttonControls = []; // To track buttons for color swapping
+  const buttonControls = [];
   let currentActiveUrl = null;
 
   const selectModel = async (url, targetBtn) => {
-    // UI Update: Reset all buttons to white, set target to active grey
+    // UI Update: Reset buttons
     buttonControls.forEach((btn) => (btn.background = "#FFFFFF"));
     if (targetBtn) targetBtn.background = "#E0E0E0";
 
+    // Toggle Visibility
     if (currentActiveUrl && loadedModels.has(currentActiveUrl)) {
       loadedModels.get(currentActiveUrl).setEnabled(false);
     }
     currentActiveUrl = url;
 
     if (loadedModels.has(url)) {
-      const root = loadedModels.get(url);
-      root.setEnabled(true);
-      iblShadows.updateVoxelization();
+      loadedModels.get(url).setEnabled(true);
     } else {
       const result = await BABYLON.SceneLoader.ImportMeshAsync(
         "",
@@ -96,28 +77,17 @@ const createScene = async function () {
       const root = result.meshes[0];
 
       // Grounding logic
-      const hierarchy = root.getHierarchyBoundingVectors();
       root.position.y = 0;
-
-      result.meshes.forEach((m) => {
-        if (m instanceof BABYLON.Mesh) {
-          iblShadows.addShadowCastingMesh(m);
-          if (m.material) iblShadows.addShadowReceivingMaterial(m.material);
-        }
-      });
-
       loadedModels.set(url, root);
-      iblShadows.updateSceneBounds();
-      iblShadows.updateVoxelization();
     }
   };
 
-  // 6. UI Implementation (Permanent Side Stack)
+  // 5. UI Implementation (Permanent Side Stack)
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
   const mainContainer = new BABYLON.GUI.StackPanel();
-  mainContainer.width = "100px";
-  mainContainer.spacing = 8; // Gap between buttons
+  mainContainer.width = "120px";
+  mainContainer.spacing = 8;
   mainContainer.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   mainContainer.verticalAlignment =
@@ -161,7 +131,7 @@ const createScene = async function () {
     buttonControls.push(btn);
   });
 
-  // Load the first model by default and highlight the first button
+  // Default selection
   selectModel(modelUrls[0], buttonControls[0]);
 
   return scene;
