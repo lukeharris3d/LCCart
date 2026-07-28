@@ -14,7 +14,7 @@ const createScene = async function () {
   const camera = new BABYLON.ArcRotateCamera(
     "camera",
     3,
-    3,
+    1.2,
     12,
     new BABYLON.Vector3(0, 0.5, 0),
     scene
@@ -27,8 +27,8 @@ const createScene = async function () {
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
 
-  // Increase exposure by 0.5 (Default is 1.0)
-  scene.imageProcessingConfiguration.exposure = 2;
+  // High exposure for a bright studio look
+  scene.imageProcessingConfiguration.exposure = 1;
   scene.environmentIntensity = 1;
 
   // 3. Ground Plane
@@ -42,31 +42,7 @@ const createScene = async function () {
   groundMat.roughness = 0.9;
   ground.material = groundMat;
 
-  // 4. Shadow Pipeline Config
-  const gBuffer = scene.enableGeometryBufferRenderer();
-  if (gBuffer) {
-    gBuffer.enablePosition = true;
-    gBuffer.enableNormal = true;
-  }
-
-  const iblShadows = new BABYLON.IblShadowsRenderPipeline(
-    "iblShadows",
-    scene,
-    {
-      resolutionExp: 6,
-      sampleDirections: 16,
-      ssShadowsEnabled: true,
-      shadowRemanence: 0.9,
-      triPlanarVoxelization: true,
-      shadowOpacity: 2,
-    },
-    [camera]
-  );
-
-  iblShadows.ssShadowOpacity = 1;
-  iblShadows.addShadowReceivingMaterial(groundMat);
-
-  // 5. Load Models - Changed helper to use zPos instead of xPos
+  // 4. Load Models (IBL Shadow logic removed)
   let model1, model2;
 
   const loadModel = async (url, zPos) => {
@@ -77,27 +53,17 @@ const createScene = async function () {
       scene
     );
     const root = result.meshes[0];
-    const bounds = scene.getWorldExtends();
-
     root.position.y = 0; // Grounding
     root.position.z = zPos; // Position along Z axis
 
-    result.meshes.forEach((m) => {
-      if (m instanceof BABYLON.Mesh) iblShadows.addShadowCastingMesh(m);
-      if (m.material) iblShadows.addShadowReceivingMaterial(m.material);
-    });
     return root;
   };
 
-  // model1 at Z=0, model2 at Z=3
+  // model1 at Z=0, model2 at Z=-2
   model1 = await loadModel(model1Url, 0);
   model2 = await loadModel(model2Url, -2);
 
-  // Initial shadow calculation
-  iblShadows.updateSceneBounds();
-  iblShadows.updateVoxelization();
-
-  // 6. Modern GUI
+  // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
   const container = new BABYLON.GUI.StackPanel();
   container.width = "120px";
@@ -125,7 +91,7 @@ const createScene = async function () {
 
     btn.onPointerUpObservable.add(() => {
       model.setEnabled(!model.isEnabled());
-      iblShadows.updateVoxelization();
+      // Removed voxelization update
       btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
       btn.color = model.isEnabled() ? "#000000" : "#999999";
     });
