@@ -33,21 +33,38 @@ const createScene = async function () {
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
 
-  // 2. Environment
+  // Environment
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
-  scene.imageProcessingConfiguration.exposure = 0.9; // Adjusted for non-shadow lighting
+  scene.imageProcessingConfiguration.exposure = 1;
+  scene.environmentIntensity = 0.6;
 
-  // 3. Ground
+  // Simple Lighting
+  const light = new BABYLON.DirectionalLight(
+    "dir01",
+    new BABYLON.Vector3(0.2, -1, 0.4),
+    scene
+  );
+  light.position = new BABYLON.Vector3(20, 15, 20);
+  light.intensity = 1;
+  light.autoCalcShadowZBounds = true;
+
+  // Shadows
+  const shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
+  shadowGenerator.getShadowMap().renderList = scene.meshes;
+  shadowGenerator.bias = 0.001;
+
+  // Ground Plane
   const ground = BABYLON.MeshBuilder.CreateGround(
     "ground",
-    { width: 30, height: 30 },
+    { width: 20, height: 20 },
     scene
   );
   const groundMat = new BABYLON.PBRMaterial("groundMat", scene);
   groundMat.albedoColor = new BABYLON.Color3(1, 1, 1);
   groundMat.roughness = 0.9;
   ground.material = groundMat;
+  ground.receiveShadows = true;
 
   // 4. Model Management
   const loadedModels = new Map();
