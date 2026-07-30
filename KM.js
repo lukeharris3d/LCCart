@@ -95,6 +95,11 @@ const createScene = async function () {
       loadedModels.set(url, root);
     }
   };
+  scene.meshes.forEach((mesh) => {
+  mesh.receiveShadows = true;
+});
+
+  
   // 5. UI Implementation
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
