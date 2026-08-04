@@ -147,7 +147,7 @@ const createScene = async function () {
   };
 
   // 1. Shelter Up Button
-  const btnShelter = createModernButton("Shelter Up", model1, (isEnabled) => {
+  const btnShelter = createModernButton("Shelter Down", model1, (isEnabled) => {
     if (isEnabled) {
       model3.setEnabled(false); // Hide Shelter Down
       btnUmberra.updateStyle();
@@ -155,7 +155,7 @@ const createScene = async function () {
   });
 
   // 2. Shelter Down Button (Directly under Shelter Up)
-  const btnUmberra = createModernButton("Shelter Down", model3, (isEnabled) => {
+  const btnUmberra = createModernButton("Shelter Up", model3, (isEnabled) => {
     if (isEnabled) {
       model1.setEnabled(false); // Hide Shelter Up
       btnShelter.updateStyle();
