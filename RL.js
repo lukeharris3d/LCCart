@@ -5,26 +5,21 @@ const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
 
-  // Model URLs
-  const model1Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01.glb";
-  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/RL_02.glb";
-  const model3Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01a.glb";
-  const model4Url = "https://lukeharris3d.github.io/LCCart/glb/RL_03.glb";
-
+  const model1Url = "https://lukeharris3d.github.io/LCCart/glb/ER_01.glb";
+  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/ER_02.glb";
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
-  // Camera setup
+  // 1. Camera setup
   const camera = new BABYLON.ArcRotateCamera(
     "camera",
-    0,
-    0,
-    10,
-    new BABYLON.Vector3(0 - 5, 0.5, 0),
+    3,
+    1.2,
+    12,
+    new BABYLON.Vector3(-1, 0, 0),
     scene
   );
-  // Set explicit camera position
-  camera.setPosition(new BABYLON.Vector3(-20, 8, 2));
+  camera.setPosition(new BABYLON.Vector3(9, 6, 9));
   camera.attachControl(canvas, true);
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
@@ -33,12 +28,12 @@ const createScene = async function () {
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
   scene.imageProcessingConfiguration.exposure = 1;
-  scene.environmentIntensity = 0.6;
+  scene.environmentIntensity = 0.7;
 
   // Simple Lighting
   const light = new BABYLON.DirectionalLight(
     "dir01",
-    new BABYLON.Vector3(0.2, -1, 0.4),
+    new BABYLON.Vector3(-0.2, -1, -0.8),
     scene
   );
   light.position = new BABYLON.Vector3(20, 15, 20);
@@ -62,8 +57,8 @@ const createScene = async function () {
   ground.material = groundMat;
   ground.receiveShadows = true;
 
-  // Load Models
-  let model1, model2, model3, model4;
+  // 4. Load Models
+  let model1, model2;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -79,19 +74,14 @@ const createScene = async function () {
     return root;
   };
 
-  // Both shelters share Z = 0 so they swap in the same spot
-  model1 = await loadModel(model1Url, 0); // Shelter Up (RL_01.glb)
-  model3 = await loadModel(model3Url, 0); // Shelter Down (RL_01a.glb)
-  model2 = await loadModel(model2Url, -1); // Bollards
-  model4 = await loadModel(model4Url, -1); // Beacon
+  // Load models at the center
+  model1 = await loadModel(model1Url, 0);
+  model2 = await loadModel(model2Url, 0);
 
-  // Hide 1a (Shelter Down) initially so it doesn't overlap with 1 on load
-  model3.setEnabled(false);
-
-  // GUI Setup
+  // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
   const container = new BABYLON.GUI.StackPanel();
-  container.width = "130px";
+  container.width = "120px";
   container.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   container.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -100,8 +90,7 @@ const createScene = async function () {
   container.spacing = 12;
   ui.addControl(container);
 
-  // Button helper with custom toggle callback support
-  const createModernButton = (text, model, onToggle = null) => {
+  const createModernButton = (text, model) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(text, text);
     btn.height = "44px";
     btn.color = "#000000";
@@ -115,22 +104,10 @@ const createScene = async function () {
     btn.shadowBlur = 10;
     btn.shadowOffsetY = 4;
 
-    const updateStyle = () => {
+    btn.onPointerUpObservable.add(() => {
+      model.setEnabled(!model.isEnabled());
       btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
       btn.color = model.isEnabled() ? "#000000" : "#999999";
-    };
-
-    btn.updateStyle = updateStyle;
-
-    btn.onPointerUpObservable.add(() => {
-      const isNowEnabled = !model.isEnabled();
-      model.setEnabled(isNowEnabled);
-
-      if (onToggle) {
-        onToggle(isNowEnabled);
-      }
-
-      updateStyle();
     });
 
     btn.onPointerEnterObservable.add(() => {
@@ -138,36 +115,15 @@ const createScene = async function () {
       btn.shadowBlur = 15;
     });
     btn.onPointerOutObservable.add(() => {
-      updateStyle();
+      btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
       btn.shadowBlur = 10;
     });
 
     container.addControl(btn);
-    return btn;
   };
 
-  // 1. Shelter Up Button
-  const btnShelter = createModernButton("Shelter Down", model1, (isEnabled) => {
-    if (isEnabled) {
-      model3.setEnabled(false); // Hide Shelter Down
-      btnUmberra.updateStyle();
-    }
-  });
-
-  // 2. Shelter Down Button (Directly under Shelter Up)
-  const btnUmberra = createModernButton("Shelter Up", model3, (isEnabled) => {
-    if (isEnabled) {
-      model1.setEnabled(false); // Hide Shelter Up
-      btnShelter.updateStyle();
-    }
-  });
-  btnUmberra.updateStyle(); // Apply initial disabled visual state
-
-  // 3. Bollards Button
-  createModernButton("Bollards", model2);
-
-  // 4. Beacon Button
-  createModernButton("Beacon", model4);
+  createModernButton("Bike Rack", model1);
+  createModernButton("Seating", model2);
 
   return scene;
 };
