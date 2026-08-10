@@ -7,6 +7,7 @@ const createScene = async function () {
 
   const model1Url = "https://lukeharris3d.github.io/LCCart/glb/AV_01.glb";
   const model2Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02.glb";
+  const model3Url = "https://lukeharris3d.github.io/LCCart/glb/AV_03.glb";
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
@@ -57,7 +58,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // 4. Load Models
-  let model1, model2;
+  let model1, model2, model3;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -77,8 +78,9 @@ const createScene = async function () {
   // Load models at the same origin
   model1 = await loadModel(model1Url, 0);
   model2 = await loadModel(model2Url, 0);
+  model3 = await loadModel(model3Url, 0);
 
-  //All mesh receive shadow
+  // All mesh receive shadow
   scene.meshes.forEach((mesh) => {
     mesh.receiveShadows = true;
   });
@@ -111,7 +113,6 @@ const createScene = async function () {
 
     btn.onPointerUpObservable.add(() => {
       model.setEnabled(!model.isEnabled());
-      // Shadow voxelization update removed
       btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
       btn.color = model.isEnabled() ? "#000000" : "#999999";
     });
@@ -130,6 +131,7 @@ const createScene = async function () {
 
   createModernButton("Shelter", model1);
   createModernButton("High Table", model2);
+  createModernButton("Steps", model3);
 
   return scene;
 };
