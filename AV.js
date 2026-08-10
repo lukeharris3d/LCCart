@@ -43,7 +43,7 @@ const createScene = async function () {
   // Shadows
   const shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
   shadowGenerator.getShadowMap().renderList = scene.meshes;
-  shadowGenerator.bias = 0.001;
+  shadowGenerator.bias = 0.01;
 
   // Ground Plane
   const ground = BABYLON.MeshBuilder.CreateGround(
