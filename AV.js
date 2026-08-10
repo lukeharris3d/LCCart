@@ -8,6 +8,7 @@ const createScene = async function () {
   const model1Url = "https://lukeharris3d.github.io/LCCart/glb/AV_01.glb";
   const model2Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02.glb";
   const model3Url = "https://lukeharris3d.github.io/LCCart/glb/AV_03.glb";
+  const model4Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02a.glb";
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
@@ -58,7 +59,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // 4. Load Models
-  let model1, model2, model3;
+  let model1, model2, model3, model4;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -76,9 +77,13 @@ const createScene = async function () {
   };
 
   // Load models at the same origin
-  model1 = await loadModel(model1Url, 0);
-  model2 = await loadModel(model2Url, 0);
-  model3 = await loadModel(model3Url, 0);
+  model1 = await loadModel(model1Url, 0); // Shelter
+  model2 = await loadModel(model2Url, 0); // High Table (AV_02.glb)
+  model3 = await loadModel(model3Url, 0); // Steps
+  model4 = await loadModel(model4Url, 0); // High Table Alt (AV_02a.glb)
+
+  // Hide model4 (High Table Alt) by default on startup
+  model4.setEnabled(false);
 
   // All mesh receive shadow
   scene.meshes.forEach((mesh) => {
@@ -88,7 +93,7 @@ const createScene = async function () {
   // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
   const container = new BABYLON.GUI.StackPanel();
-  container.width = "120px";
+  container.width = "130px";
   container.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   container.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -97,11 +102,11 @@ const createScene = async function () {
   container.spacing = 12;
   ui.addControl(container);
 
-  const createModernButton = (text, model) => {
+  const createModernButton = (text, model, onToggle = null) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(text, text);
     btn.height = "44px";
-    btn.color = "#000000";
-    btn.background = "#FFFFFF";
+    btn.color = model.isEnabled() ? "#000000" : "#999999";
+    btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
     btn.cornerRadius = 8;
     btn.thickness = 0;
     btn.fontSize = "13px";
@@ -111,10 +116,22 @@ const createScene = async function () {
     btn.shadowBlur = 10;
     btn.shadowOffsetY = 4;
 
-    btn.onPointerUpObservable.add(() => {
-      model.setEnabled(!model.isEnabled());
+    const updateStyle = () => {
       btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
       btn.color = model.isEnabled() ? "#000000" : "#999999";
+    };
+
+    btn.updateStyle = updateStyle;
+
+    btn.onPointerUpObservable.add(() => {
+      const isNowEnabled = !model.isEnabled();
+      model.setEnabled(isNowEnabled);
+
+      if (onToggle) {
+        onToggle(isNowEnabled);
+      }
+
+      updateStyle();
     });
 
     btn.onPointerEnterObservable.add(() => {
@@ -122,15 +139,34 @@ const createScene = async function () {
       btn.shadowBlur = 15;
     });
     btn.onPointerOutObservable.add(() => {
-      btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
+      updateStyle();
       btn.shadowBlur = 10;
     });
 
     container.addControl(btn);
+    return btn;
   };
 
+  // 1. Shelter Button
   createModernButton("Shelter", model1);
-  createModernButton("High Table", model2);
+
+  // 2. High Table Button
+  const btnHighTable = createModernButton("High Table", model2, (isEnabled) => {
+    model4.setEnabled(!isEnabled); // High Table Alt is always opposite of High Table
+    btnHighTableAlt.updateStyle();
+  });
+
+  // 3. High Table Alt Button
+  const btnHighTableAlt = createModernButton(
+    "High Table Alt",
+    model4,
+    (isEnabled) => {
+      model2.setEnabled(!isEnabled); // High Table is always opposite of High Table Alt
+      btnHighTable.updateStyle();
+    }
+  );
+
+  // 4. Steps Button
   createModernButton("Steps", model3);
 
   return scene;
