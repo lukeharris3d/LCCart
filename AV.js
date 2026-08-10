@@ -56,7 +56,6 @@ const createScene = async function () {
   ground.material = groundMat;
   ground.receiveShadows = true;
 
-
   // 4. Load Models
   let model1, model2;
 
@@ -78,6 +77,11 @@ const createScene = async function () {
   // Load models at the same origin
   model1 = await loadModel(model1Url, 0);
   model2 = await loadModel(model2Url, 0);
+
+  //All mesh receive shadow
+  scene.meshes.forEach((mesh) => {
+    mesh.receiveShadows = true;
+  });
 
   // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -125,7 +129,7 @@ const createScene = async function () {
   };
 
   createModernButton("Shelter", model1);
-  createModernButton("Steppers", model2);
+  createModernButton("High Table", model2);
 
   return scene;
 };
