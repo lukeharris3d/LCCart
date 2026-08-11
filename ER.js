@@ -16,9 +16,10 @@ const createScene = async function () {
     3,
     1.2,
     12,
-    new BABYLON.Vector3(0, 0.5, 0),
+    new BABYLON.Vector3(-1, 0, 0),
     scene
   );
+  camera.setPosition(new BABYLON.Vector3(9, 6, 9));
   camera.attachControl(canvas, true);
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
@@ -27,7 +28,7 @@ const createScene = async function () {
   const envTex = BABYLON.CubeTexture.CreateFromPrefilteredData(envUrl, scene);
   scene.environmentTexture = envTex;
   scene.imageProcessingConfiguration.exposure = 1;
-  scene.environmentIntensity = 0.6;
+  scene.environmentIntensity = 0.7;
 
   // Simple Lighting
   const light = new BABYLON.DirectionalLight(
