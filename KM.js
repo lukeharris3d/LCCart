@@ -152,6 +152,97 @@ const createScene = async function () {
   // Default selection
   selectModel(modelUrls[0], buttonControls[0]);
 
+  // --- BOTTOM-LEFT STACK PANEL (Fullscreen & Screenshot Buttons) ---
+  const leftContainer = new BABYLON.GUI.StackPanel();
+  leftContainer.width = "140px";
+  leftContainer.horizontalAlignment =
+    BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+  leftContainer.verticalAlignment =
+    BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+  leftContainer.top = "-40px";
+  leftContainer.left = "40px";
+  leftContainer.spacing = 12;
+  ui.addControl(leftContainer);
+
+  // 1. FULLSCREEN BUTTON (Above Screenshot Button)
+  const fullscreenBtn = BABYLON.GUI.Button.CreateSimpleButton(
+    "fullscreenBtn",
+    "⛶ Fullscreen"
+  );
+  fullscreenBtn.height = "44px";
+  fullscreenBtn.color = "#000000";
+  fullscreenBtn.background = "#FFFFFF";
+  fullscreenBtn.cornerRadius = 8;
+  fullscreenBtn.thickness = 0;
+  fullscreenBtn.fontSize = "13px";
+  fullscreenBtn.fontFamily = "Segoe UI, sans-serif";
+  fullscreenBtn.fontWeight = "400";
+  fullscreenBtn.shadowColor = "rgba(0,0,0,0.1)";
+  fullscreenBtn.shadowBlur = 10;
+  fullscreenBtn.shadowOffsetY = 4;
+
+  fullscreenBtn.onPointerUpObservable.add(() => {
+    engine.switchFullscreen(false); // Toggle full screen mode
+  });
+
+  fullscreenBtn.onPointerEnterObservable.add(() => {
+    fullscreenBtn.background = "#F8F8F8";
+    fullscreenBtn.shadowBlur = 15;
+  });
+  fullscreenBtn.onPointerOutObservable.add(() => {
+    fullscreenBtn.background = "#FFFFFF";
+    fullscreenBtn.shadowBlur = 10;
+  });
+
+  leftContainer.addControl(fullscreenBtn);
+
+  // 2. SCREENSHOT BUTTON
+  const screenshotBtn = BABYLON.GUI.Button.CreateSimpleButton(
+    "screenshotBtn",
+    "📷 Screenshot"
+  );
+  screenshotBtn.height = "44px";
+  screenshotBtn.color = "#000000";
+  screenshotBtn.background = "#FFFFFF";
+  screenshotBtn.cornerRadius = 8;
+  screenshotBtn.thickness = 0;
+  screenshotBtn.fontSize = "13px";
+  screenshotBtn.fontFamily = "Segoe UI, sans-serif";
+  screenshotBtn.fontWeight = "400";
+  screenshotBtn.shadowColor = "rgba(0,0,0,0.1)";
+  screenshotBtn.shadowBlur = 10;
+  screenshotBtn.shadowOffsetY = 4;
+
+  screenshotBtn.onPointerUpObservable.add(async () => {
+    // Hide all GUI buttons temporarily
+    ui.rootContainer.isVisible = false;
+
+    // Take high-res screenshot (2x resolution)
+    const dataUrl = await BABYLON.Tools.CreateScreenshotAsync(engine, camera, {
+      precision: 2,
+    });
+
+    // Restore GUI buttons immediately after render
+    ui.rootContainer.isVisible = true;
+
+    // Download PNG file
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `scene_screenshot_clean_${Date.now()}.png`;
+    link.click();
+  });
+
+  screenshotBtn.onPointerEnterObservable.add(() => {
+    screenshotBtn.background = "#F8F8F8";
+    screenshotBtn.shadowBlur = 15;
+  });
+  screenshotBtn.onPointerOutObservable.add(() => {
+    screenshotBtn.background = "#FFFFFF";
+    screenshotBtn.shadowBlur = 10;
+  });
+
+  leftContainer.addControl(screenshotBtn);
+
   return scene;
 };
 
