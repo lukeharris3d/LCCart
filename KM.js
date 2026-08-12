@@ -14,6 +14,7 @@ const createScene = async function () {
     "https://lukeharris3d.github.io/LCCart/glb/KM_02.glb",
     "https://lukeharris3d.github.io/LCCart/glb/KM_03.glb",
   ];
+  const bikeRackUrl = "https://lukeharris3d.github.io/LCCart/glb/KM_04.glb";
 
   // 1. Camera setup
   const camera = new BABYLON.ArcRotateCamera(
@@ -25,6 +26,7 @@ const createScene = async function () {
     scene
   );
   camera.attachControl(canvas, true);
+  camera.setPosition(new BABYLON.Vector3(6, 4, 6));
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
 
@@ -47,7 +49,7 @@ const createScene = async function () {
   // Shadows
   const shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
   shadowGenerator.getShadowMap().renderList = scene.meshes;
-  shadowGenerator.bias = 0.001;
+  shadowGenerator.bias = 0.01;
   shadowGenerator._darkness = -2;
 
   // Ground Plane
@@ -68,7 +70,7 @@ const createScene = async function () {
   let currentActiveUrl = null;
 
   const selectModel = async (url, targetBtn) => {
-    // UI Update: Reset all buttons
+    // UI Update: Reset all option buttons
     buttonControls.forEach((btn) => (btn.background = "#FFFFFF"));
     if (targetBtn) targetBtn.background = "#E0E0E0";
 
@@ -95,16 +97,27 @@ const createScene = async function () {
       loadedModels.set(url, root);
     }
   };
-  scene.meshes.forEach((mesh) => {
-  mesh.receiveShadows = true;
-});
 
-  
+  // Pre-load Bike Rack model (starts hidden)
+  const bikeRackResult = await BABYLON.SceneLoader.ImportMeshAsync(
+    "",
+    bikeRackUrl,
+    "",
+    scene
+  );
+  const bikeRackModel = bikeRackResult.meshes[0];
+  bikeRackModel.position.y = 0;
+  bikeRackModel.setEnabled(false);
+
+  scene.meshes.forEach((mesh) => {
+    mesh.receiveShadows = true;
+  });
+
   // 5. UI Implementation
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
   const mainContainer = new BABYLON.GUI.StackPanel();
-  mainContainer.width = "100px";
+  mainContainer.width = "110px";
   mainContainer.spacing = 8;
   mainContainer.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
@@ -127,6 +140,7 @@ const createScene = async function () {
     btn.shadowOffsetY = 4;
   };
 
+  // Create Option 1, Option 2, Option 3 buttons
   modelUrls.forEach((url, index) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(
       `btn${index}`,
@@ -150,7 +164,29 @@ const createScene = async function () {
   });
 
   // Default selection
-  selectModel(modelUrls[0], buttonControls[0]);
+  await selectModel(modelUrls[0], buttonControls[0]);
+
+  // Bike Rack Toggle Button (under the Option buttons)
+  const bikeRackBtn = BABYLON.GUI.Button.CreateSimpleButton(
+    "btnBikeRack",
+    "Bike Rack"
+  );
+  applyModernStyle(bikeRackBtn);
+
+  bikeRackBtn.onPointerEnterObservable.add(() => {
+    if (!bikeRackModel.isEnabled()) bikeRackBtn.background = "#F8F8F8";
+  });
+  bikeRackBtn.onPointerOutObservable.add(() => {
+    if (!bikeRackModel.isEnabled()) bikeRackBtn.background = "#FFFFFF";
+  });
+
+  bikeRackBtn.onPointerUpObservable.add(() => {
+    const isEnabled = !bikeRackModel.isEnabled();
+    bikeRackModel.setEnabled(isEnabled);
+    bikeRackBtn.background = isEnabled ? "#E0E0E0" : "#FFFFFF";
+  });
+
+  mainContainer.addControl(bikeRackBtn);
 
   // --- BOTTOM-LEFT STACK PANEL (Fullscreen & Screenshot Buttons) ---
   const leftContainer = new BABYLON.GUI.StackPanel();
