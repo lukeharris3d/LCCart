@@ -6,10 +6,11 @@ const createScene = async function () {
   scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
 
   // Model URLs
-  const model1Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01.glb";
-  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/RL_02.glb";
-  const model3Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01a.glb";
-  const model4Url = "https://lukeharris3d.github.io/LCCart/glb/RL_03.glb";
+  const model1Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01b.glb"; // Default Display Shelter
+  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/RL_02.glb";  // Bollards
+  const model3Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01a.glb"; // Shelter Up
+  const model4Url = "https://lukeharris3d.github.io/LCCart/glb/RL_03.glb";  // Beacon
+  const model5Url = "https://lukeharris3d.github.io/LCCart/glb/RL_01.glb";   // Shelter Alt (RL_01)
 
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
@@ -20,7 +21,7 @@ const createScene = async function () {
     0,
     0,
     10,
-    new BABYLON.Vector3(0 - 5, 0.5, 0),
+    new BABYLON.Vector3(-5, 0.5, 0),
     scene
   );
   // Set explicit camera position
@@ -63,7 +64,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // Load Models
-  let model1, model2, model3, model4;
+  let model1, model2, model3, model4, model5;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -79,14 +80,16 @@ const createScene = async function () {
     return root;
   };
 
-  // Both shelters share Z = 0 so they swap in the same spot
-  model1 = await loadModel(model1Url, 0); // Shelter Up (RL_01.glb)
-  model3 = await loadModel(model3Url, 0); // Shelter Down (RL_01a.glb)
+  // Shelters share Z = 0 so they swap in the same spot
+  model1 = await loadModel(model1Url, 0); // RL_01b.glb (Default Display)
+  model3 = await loadModel(model3Url, 0); // RL_01a.glb (Shelter Up)
+  model5 = await loadModel(model5Url, 0); // RL_01.glb (Shelter Alt)
   model2 = await loadModel(model2Url, -1); // Bollards
   model4 = await loadModel(model4Url, -1); // Beacon
 
-  // Hide 1a (Shelter Down) initially so it doesn't overlap with 1 on load
+  // Hide non-default shelter models initially so they don't overlap
   model3.setEnabled(false);
+  model5.setEnabled(false);
 
   // GUI Setup
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -104,8 +107,8 @@ const createScene = async function () {
   const createModernButton = (text, model, onToggle = null) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(text, text);
     btn.height = "44px";
-    btn.color = "#000000";
-    btn.background = "#FFFFFF";
+    btn.color = model.isEnabled() ? "#000000" : "#999999";
+    btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
     btn.cornerRadius = 8;
     btn.thickness = 0;
     btn.fontSize = "13px";
@@ -146,27 +149,30 @@ const createScene = async function () {
     return btn;
   };
 
-  // 1. Shelter Up Button
-  const btnShelter = createModernButton("Shelter Down", model1, (isEnabled) => {
-    if (isEnabled) {
-      model3.setEnabled(false); // Hide Shelter Down
-      btnUmberra.updateStyle();
-    }
-  });
+  // Group shelter buttons for mutual exclusivity
+  const shelterButtons = [];
 
-  // 2. Shelter Down Button (Directly under Shelter Up)
-  const btnUmberra = createModernButton("Shelter Up", model3, (isEnabled) => {
-    if (isEnabled) {
-      model1.setEnabled(false); // Hide Shelter Up
-      btnShelter.updateStyle();
-    }
-  });
-  btnUmberra.updateStyle(); // Apply initial disabled visual state
+  const createShelterButton = (text, model) => {
+    const btn = createModernButton(text, model, (isEnabled) => {
+      if (isEnabled) {
+        // Disable all other shelter models when this one is enabled
+        [model1, model3, model5].forEach((m) => {
+          if (m !== model) m.setEnabled(false);
+        });
+        shelterButtons.forEach((b) => b.updateStyle());
+      }
+    });
+    shelterButtons.push(btn);
+    return btn;
+  };
 
-  // 3. Bollards Button
+  // 1. Shelter Buttons (Mutually Exclusive)
+  createShelterButton("Shelter", model1);      // RL_01b.glb (Active on start)
+  createShelterButton("Shelter Up", model3);   // RL_01a.glb
+  createShelterButton("Shelter Alt", model5);  // RL_01.glb
+
+  // 2. Independent Accessory Buttons
   createModernButton("Bollards", model2);
-
-  // 4. Beacon Button
   createModernButton("Beacon", model4);
 
   // --- BOTTOM-LEFT STACK PANEL (Fullscreen & Screenshot Buttons) ---
