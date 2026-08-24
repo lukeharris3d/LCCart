@@ -25,7 +25,7 @@ const createScene = async function () {
     scene
   );
   camera.attachControl(canvas, true);
-  camera.setPosition(new BABYLON.Vector3(12, 4, 10));
+  camera.setPosition(new BABYLON.Vector3(7, 4, 10));
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
 
