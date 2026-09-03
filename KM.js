@@ -7,6 +7,7 @@ const createScene = async function () {
 
   const model1Url = "https://lukeharris3d.github.io/LCCart/glb/KM_A01.glb";
   const model2Url = "https://lukeharris3d.github.io/LCCart/glb/KM_A02.glb";
+  const model3Url = "https://lukeharris3d.github.io/LCCart/glb/KM_A03.glb";
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
@@ -16,10 +17,10 @@ const createScene = async function () {
     3,
     1.2,
     12,
-    new BABYLON.Vector3(-1, 0, 0),
+    new BABYLON.Vector3(2, 0, 0),
     scene
   );
-  camera.setPosition(new BABYLON.Vector3(9, 6, 9));
+  camera.setPosition(new BABYLON.Vector3(8, 8, 19));
   camera.attachControl(canvas, true);
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
@@ -58,7 +59,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // 4. Load Models
-  let model1, model2;
+  let model1, model2, model3;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -77,6 +78,7 @@ const createScene = async function () {
   // Load models at the center
   model1 = await loadModel(model1Url, 0);
   model2 = await loadModel(model2Url, 0);
+  model3 = await loadModel(model3Url, 0);
 
   // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -124,6 +126,7 @@ const createScene = async function () {
 
   createModernButton("Butterfly", model1);
   createModernButton("Bike Rack", model2);
+  createModernButton("Ground Treatment", model3);
 
   return scene;
 };
