@@ -5,9 +5,8 @@ const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
 
-  const model1Url = "https://lukeharris3d.github.io/LCCart/glb/KM_A01.glb";
-  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/KM_A02.glb";
-  const model3Url = "https://lukeharris3d.github.io/LCCart/glb/KM_A03.glb";
+  const model1Url = "https://lukeharris3d.github.io/LCCart/glb/ER_A01.glb";
+  const model2Url = "https://lukeharris3d.github.io/LCCart/glb/ER_A02.glb";
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
@@ -59,7 +58,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // 4. Load Models
-  let model1, model2, model3;
+  let model1, model2;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -78,7 +77,6 @@ const createScene = async function () {
   // Load models at the center
   model1 = await loadModel(model1Url, 0);
   model2 = await loadModel(model2Url, 0);
-  model3 = await loadModel(model3Url, 0);
 
   // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -124,9 +122,10 @@ const createScene = async function () {
     container.addControl(btn);
   };
 
-  createModernButton("Butterfly", model1);
-  createModernButton("Bike Rack", model2);
-  createModernButton("Ground Treatment", model3);
+  createModernButton("Bike Rack", model1);
+  createModernButton("Seating", model2);
+
+
 
   return scene;
 };
