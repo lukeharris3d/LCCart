@@ -17,10 +17,10 @@ const createScene = async function () {
     3,
     1.2,
     12,
-    new BABYLON.Vector3(2, 0, 0),
+    new BABYLON.Vector3(-1, 0, 0),
     scene
   );
-  camera.setPosition(new BABYLON.Vector3(8, 8, 19));
+  camera.setPosition(new BABYLON.Vector3((9, 6, 9));
   camera.attachControl(canvas, true);
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
