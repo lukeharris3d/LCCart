@@ -20,7 +20,8 @@ const createScene = async function () {
     new BABYLON.Vector3(-1, 0, 0),
     scene
   );
-  camera.setPosition(new BABYLON.Vector3((9, 6, 9));
+  // Fixed syntax error here: removed extra opening parenthesis
+  camera.setPosition(new BABYLON.Vector3(9, 6, 9));
   camera.attachControl(canvas, true);
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
@@ -46,6 +47,11 @@ const createScene = async function () {
   shadowGenerator.getShadowMap().renderList = scene.meshes;
   shadowGenerator.bias = 0.001;
 
+  // Ensure all newly added meshes receive shadows
+  scene.onNewMeshAddedObservable.add((mesh) => {
+    mesh.receiveShadows = true;
+  });
+
   // Ground Plane
   const ground = BABYLON.MeshBuilder.CreateGround(
     "ground",
@@ -59,7 +65,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // 4. Load Models
-  let model1, model2, model3;
+  let model1Meshes, model2Meshes, model3Meshes;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -72,18 +78,18 @@ const createScene = async function () {
     root.position.y = 0; // Grounding
     root.position.z = zPos; // Position along Z axis
 
-    return root;
+    return result.meshes; // Return all sub-meshes for reliable toggling
   };
 
   // Load models at the center
-  model1 = await loadModel(model1Url, 0);
-  model2 = await loadModel(model2Url, 0);
-  model3 = await loadModel(model3Url, 0);
+  model1Meshes = await loadModel(model1Url, 0);
+  model2Meshes = await loadModel(model2Url, 0);
+  model3Meshes = await loadModel(model3Url, 0);
 
   // 5. Modern GUI
   const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
   const container = new BABYLON.GUI.StackPanel();
-  container.width = "120px";
+  container.width = "140px";
   container.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   container.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -92,7 +98,7 @@ const createScene = async function () {
   container.spacing = 12;
   ui.addControl(container);
 
-  const createModernButton = (text, model) => {
+  const createModernButton = (text, meshes) => {
     const btn = BABYLON.GUI.Button.CreateSimpleButton(text, text);
     btn.height = "44px";
     btn.color = "#000000";
@@ -106,10 +112,14 @@ const createScene = async function () {
     btn.shadowBlur = 10;
     btn.shadowOffsetY = 4;
 
+    let isEnabled = true;
+
     btn.onPointerUpObservable.add(() => {
-      model.setEnabled(!model.isEnabled());
-      btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
-      btn.color = model.isEnabled() ? "#000000" : "#999999";
+      isEnabled = !isEnabled;
+      // Toggle all sub-meshes in the GLB model
+      meshes.forEach((m) => m.setEnabled(isEnabled));
+      btn.background = isEnabled ? "#FFFFFF" : "#F0F0F0";
+      btn.color = isEnabled ? "#000000" : "#999999";
     });
 
     btn.onPointerEnterObservable.add(() => {
@@ -117,16 +127,16 @@ const createScene = async function () {
       btn.shadowBlur = 15;
     });
     btn.onPointerOutObservable.add(() => {
-      btn.background = model.isEnabled() ? "#FFFFFF" : "#F0F0F0";
+      btn.background = isEnabled ? "#FFFFFF" : "#F0F0F0";
       btn.shadowBlur = 10;
     });
 
     container.addControl(btn);
   };
 
-  createModernButton("Butterfly", model1);
-  createModernButton("Bike Rack", model2);
-  createModernButton("Ground Treatment", model3);
+  createModernButton("Butterfly", model1Meshes);
+  createModernButton("Bike Rack", model2Meshes);
+  createModernButton("Ground Treatment", model3Meshes);
 
   return scene;
 };
