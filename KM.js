@@ -17,11 +17,11 @@ const createScene = async function () {
     3,
     1.2,
     12,
-    new BABYLON.Vector3(-1, 0, 0),
+    new BABYLON.Vector3(4, 0, 0),
     scene
   );
   // Fixed syntax error here: removed extra opening parenthesis
-  camera.setPosition(new BABYLON.Vector3(9, 6, 9));
+  camera.setPosition(new BABYLON.Vector3(12, 5, 13));
   camera.attachControl(canvas, true);
   camera.upperBetaLimit = (Math.PI / 2) * 0.98;
   camera.wheelPrecision = 50;
