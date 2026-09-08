@@ -5,10 +5,13 @@ const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
 
+  // Model URLs
   const model1Url = "https://lukeharris3d.github.io/LCCart/glb/AV_01.glb";
   const model2Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02.glb";
   const model3Url = "https://lukeharris3d.github.io/LCCart/glb/AV_03.glb";
-  const model4Url = "https://lukeharris3d.github.io/LCCart/glb/AV_02a.glb";
+  const model4Url = "https://lukeharris3d.github.io/LCCart/glb/AV_04.glb";
+  const model5Url = "https://lukeharris3d.github.io/LCCart/glb/AV_05.glb";
+
   const envUrl =
     "https://lukeharris3d.github.io/LCCart/env/homecoming_center_rooftop_2k.env";
 
@@ -18,7 +21,7 @@ const createScene = async function () {
     3,
     1.2,
     12,
-    new BABYLON.Vector3(0, 0.5, 0),
+    new BABYLON.Vector3(-2, 0.5, 0),
     scene
   );
   camera.attachControl(canvas, true);
@@ -59,7 +62,7 @@ const createScene = async function () {
   ground.receiveShadows = true;
 
   // 4. Load Models
-  let model1, model2, model3, model4;
+  let model1, model2, model3, model4, model5;
 
   const loadModel = async (url, zPos) => {
     const result = await BABYLON.SceneLoader.ImportMeshAsync(
@@ -76,14 +79,12 @@ const createScene = async function () {
     return root;
   };
 
-  // Load models at the same origin
-  model1 = await loadModel(model1Url, 0); // Shelter
-  model2 = await loadModel(model2Url, 0); // High Table (AV_02.glb)
-  model3 = await loadModel(model3Url, 0); // Steps
-  model4 = await loadModel(model4Url, 0); // High Table Alt (AV_02a.glb)
-
-  // Hide model4 (High Table Alt) by default on startup
-  model4.setEnabled(false);
+  // Load models at origin
+  model1 = await loadModel(model1Url, 0);
+  model2 = await loadModel(model2Url, 0);
+  model3 = await loadModel(model3Url, 0);
+  model4 = await loadModel(model4Url, 0);
+  model5 = await loadModel(model5Url, 0);
 
   // All mesh receive shadow
   scene.meshes.forEach((mesh) => {
@@ -95,7 +96,7 @@ const createScene = async function () {
 
   // --- RIGHT STACK PANEL (Model Toggle Buttons) ---
   const container = new BABYLON.GUI.StackPanel();
-  container.width = "130px";
+  container.width = "150px"; // Increased width slightly for longer button labels
   container.horizontalAlignment =
     BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   container.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -149,118 +150,12 @@ const createScene = async function () {
     return btn;
   };
 
-  // 1. Shelter Button
+  // Model Toggle Buttons
   createModernButton("Shelter", model1);
-
-  // 2. High Table Button
-  const btnHighTable = createModernButton("High Table", model2, (isEnabled) => {
-    model4.setEnabled(!isEnabled);
-    btnHighTableAlt.updateStyle();
-  });
-
-  // 3. High Table Alt Button
-  const btnHighTableAlt = createModernButton(
-    "High Table Alt",
-    model4,
-    (isEnabled) => {
-      model2.setEnabled(!isEnabled);
-      btnHighTable.updateStyle();
-    }
-  );
-
-  // 4. Steps Button
-  createModernButton("Steps", model3);
-
-  // --- BOTTOM-LEFT STACK PANEL (Fullscreen & Screenshot Buttons) ---
-  const leftContainer = new BABYLON.GUI.StackPanel();
-  leftContainer.width = "140px";
-  leftContainer.horizontalAlignment =
-    BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-  leftContainer.verticalAlignment =
-    BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-  leftContainer.top = "-40px";
-  leftContainer.left = "40px";
-  leftContainer.spacing = 12;
-  ui.addControl(leftContainer);
-
-  // 1. FULLSCREEN BUTTON (Above Screenshot Button)
-  const fullscreenBtn = BABYLON.GUI.Button.CreateSimpleButton(
-    "fullscreenBtn",
-    "⛶ Fullscreen"
-  );
-  fullscreenBtn.height = "44px";
-  fullscreenBtn.color = "#000000";
-  fullscreenBtn.background = "#FFFFFF";
-  fullscreenBtn.cornerRadius = 8;
-  fullscreenBtn.thickness = 0;
-  fullscreenBtn.fontSize = "13px";
-  fullscreenBtn.fontFamily = "Segoe UI, sans-serif";
-  fullscreenBtn.fontWeight = "400";
-  fullscreenBtn.shadowColor = "rgba(0,0,0,0.1)";
-  fullscreenBtn.shadowBlur = 10;
-  fullscreenBtn.shadowOffsetY = 4;
-
-  fullscreenBtn.onPointerUpObservable.add(() => {
-    engine.switchFullscreen(false); // Toggle full screen mode
-  });
-
-  fullscreenBtn.onPointerEnterObservable.add(() => {
-    fullscreenBtn.background = "#F8F8F8";
-    fullscreenBtn.shadowBlur = 15;
-  });
-  fullscreenBtn.onPointerOutObservable.add(() => {
-    fullscreenBtn.background = "#FFFFFF";
-    fullscreenBtn.shadowBlur = 10;
-  });
-
-  leftContainer.addControl(fullscreenBtn);
-
-  // 2. SCREENSHOT BUTTON
-  const screenshotBtn = BABYLON.GUI.Button.CreateSimpleButton(
-    "screenshotBtn",
-    "📷 Screenshot"
-  );
-  screenshotBtn.height = "44px";
-  screenshotBtn.color = "#000000";
-  screenshotBtn.background = "#FFFFFF";
-  screenshotBtn.cornerRadius = 8;
-  screenshotBtn.thickness = 0;
-  screenshotBtn.fontSize = "13px";
-  screenshotBtn.fontFamily = "Segoe UI, sans-serif";
-  screenshotBtn.fontWeight = "400";
-  screenshotBtn.shadowColor = "rgba(0,0,0,0.1)";
-  screenshotBtn.shadowBlur = 10;
-  screenshotBtn.shadowOffsetY = 4;
-
-  screenshotBtn.onPointerUpObservable.add(async () => {
-    // Hide all GUI buttons temporarily
-    ui.rootContainer.isVisible = false;
-
-    // Take high-res screenshot (2x resolution)
-    const dataUrl = await BABYLON.Tools.CreateScreenshotAsync(engine, camera, {
-      precision: 2,
-    });
-
-    // Restore GUI buttons immediately after render
-    ui.rootContainer.isVisible = true;
-
-    // Download PNG file
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `scene_screenshot_clean_${Date.now()}.png`;
-    link.click();
-  });
-
-  screenshotBtn.onPointerEnterObservable.add(() => {
-    screenshotBtn.background = "#F8F8F8";
-    screenshotBtn.shadowBlur = 15;
-  });
-  screenshotBtn.onPointerOutObservable.add(() => {
-    screenshotBtn.background = "#FFFFFF";
-    screenshotBtn.shadowBlur = 10;
-  });
-
-  leftContainer.addControl(screenshotBtn);
+  createModernButton("Platform", model2);
+  createModernButton("STable", model3);
+  createModernButton("Step Play", model4);
+  createModernButton("Ground Treatment", model5);
 
   return scene;
 };
