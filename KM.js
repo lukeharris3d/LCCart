@@ -160,7 +160,7 @@ const createScene = async function () {
   });
 
   // Bike Opt 2: Hidden by default. When turned on, turns Opt 1 off.
-  bikeOpt2Btn = createModernButton("bike opt 2", model2Meshes, false, (isEnabled) => {
+  bikeOpt2Btn = createModernButton("bike rack opt 2", model2Meshes, false, (isEnabled) => {
     if (isEnabled && bikeOpt1Btn) {
       bikeOpt1Btn.setState(false);
     }
